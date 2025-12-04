@@ -8,11 +8,18 @@
     <div v-if="loading" class="ww__loading">Loading...</div>
 
     <div v-else class="ww__list">
-      <WeatherCard v-for="city in cities" :key="city.id" :city="city.name" :country="city.country"
-        :temp="round(city.weather?.main?.temp)" :description="city.description"
-        :feelsLike="round(city.weather?.main?.feels_like)" :windSpeed="city.weather?.wind?.speed"
-        :windDeg="city.weather?.wind?.deg" :humidity="city.weather?.main?.humidity"
-        :pressure="city.weather?.main?.pressure" :visibility="city.weather?.visibility"
+      <WeatherCard v-for="city in cities"
+        :key="city.id"
+        :city="city.name"
+        :country="city.country"
+        :temp="round(city.weather?.main?.temp)"
+        :description="city.description"
+        :feelsLike="round(city.weather?.main?.feels_like)"
+        :windSpeed="city.weather?.wind?.speed"
+        :windDeg="city.weather?.wind?.deg"
+        :humidity="city.weather?.main?.humidity"
+        :pressure="city.weather?.main?.pressure"
+        :visibility="city.weather?.visibility"
         :icon="city.weather?.weather?.[0]?.icon" />
     </div>
 
