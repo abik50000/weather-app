@@ -49,7 +49,7 @@ const props = defineProps({
   humidity: Number,
   pressure: Number,
   visibility: Number,
-  icon: { type: String, default: undefined }, // openweathermap icon code
+  icon: { type: String, default: undefined }, 
 });
 
 function dewPoint(tempC: number, humidity: number) {
@@ -74,6 +74,7 @@ const iconUrl = props.icon ? `https://openweathermap.org/img/wn/${props.icon}@2x
   .city {
     font-weight: 700;
     font-size: 18px;
+    margin:0;
   }
 
   .temp-block {

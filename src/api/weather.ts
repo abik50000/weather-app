@@ -1,6 +1,7 @@
 import axios from "axios";
 import { WeatherApiResult } from "./types/weather";
 import type { CityConfig } from "../types";
+import type { GeoResponse } from "./types/city";
 
 const API_KEY = (import.meta as any).env.VITE_OPENWEATHER_KEY;
 
@@ -62,7 +63,7 @@ async function getWeatherByCoords(lat: number, lon: number) {
         lon,
         appid: API_KEY,
         units: "metric",
-        lang: "ru"
+        lang: "en"
       }
     });
 
@@ -72,7 +73,6 @@ async function getWeatherByCoords(lat: number, lon: number) {
   }
 }
 
-import type { GeoResponse } from "./types/city";
 
 async function getCityByCoords(lat: number, lon: number): Promise<CityConfig> {
   const url = `https://api.openweathermap.org/geo/1.0/reverse`;
@@ -86,13 +86,13 @@ async function getCityByCoords(lat: number, lon: number): Promise<CityConfig> {
     },
   });
 
-  if (!data.length) throw new Error("Город не найден");
+  if (!data.length) throw new Error("City not found");
 
   const c = data[0];
 
   return {
     id: `${c.lat}_${c.lon}`,
-    name: c.local_names?.ru || c.local_names?.en || c.name || "Unknown",
+    name: c.local_names?.en || c.name || "Unknown",
     lat: c.lat,
     lon: c.lon,
   };
@@ -104,13 +104,13 @@ async function getCoordsByCity(city: string) {
 
   const { data } = await axios.get(url, {
     params: {
-      q: city,  // "Almaty,KZ"
+      q: city,
       limit,
       appid: API_KEY,
     },
   });
 
-  if (data.length === 0) throw new Error("Город не найден");
+  if (data.length === 0) throw new Error("City not found");
 
   return {
     lat: data[0].lat,
