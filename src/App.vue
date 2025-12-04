@@ -8,11 +8,19 @@
     <div v-if="loading" class="ww__loading">Loading...</div>
 
     <div v-else class="ww__list">
-      <WeatherCard v-for="city in cities" :key="city.id" :city="city.name" :temp="city.weather?.main?.temp"
-        :description="city.description" :feelsLike="city.weather?.main?.feels_like"
-        :windSpeed="city.weather?.wind?.speed" :windDeg="city.weather?.wind?.deg"
-        :humidity="city.weather?.main?.humidity" :pressure="city.weather?.main?.pressure"
-        :visibility="city.weather?.visibility" :icon="city.weather?.weather[0]?.icon" />
+      <WeatherCard v-for="city in cities"
+        :key="city.id"
+        :city="city.name"
+        :country="city.country"
+        :temp="round(city.weather?.main?.temp)"
+        :description="city.description"
+        :feelsLike="round(city.weather?.main?.feels_like)"
+        :windSpeed="city.weather?.wind?.speed"
+        :windDeg="city.weather?.wind?.deg"
+        :humidity="city.weather?.main?.humidity"
+        :pressure="city.weather?.main?.pressure"
+        :visibility="city.weather?.visibility"
+        :icon="city.weather?.weather[0]?.icon" />
     </div>
 
     <SettingsPanel v-if="open" :cities="cities" @update="onConfigUpdate" @close="open = false" />
@@ -52,11 +60,16 @@ const load = () => {
       lon: c.lon,
       temp: c.temp ?? null,
       description: c.description ?? "",
+      country: c.country ?? "",
     }));
   } catch {
     cities.value = [];
   }
 };
+
+function round(num: number | undefined) {
+  return Math.round(num ?? 0);
+}
 
 /** Load weather by coords */
 const loadWeather = async (list: CityConfig[]) => {
@@ -83,7 +96,8 @@ const addByGeolocation = () => {
     const { latitude, longitude } = pos.coords;
     try {
       const city = await API.getCityByCoords(latitude, longitude);
-      const newCity: CityConfig = { id: city.id, name: city.name, lat: city.lat, lon: city.lon, description: "" };
+      console.log('City:', city)
+      const newCity: CityConfig = { id: city.id, name: city.name, lat: city.lat, lon: city.lon, description: "", country: city.country };
       cities.value = [newCity];
       save();
       await loadWeather(cities.value);
@@ -111,8 +125,11 @@ const onConfigUpdate = async (newList: CityConfig[]) => {
 
 
 <style scoped lang="scss">
+*{
+  font-family: 'Inter', sans-serif;
+}
 .ww {
-  width: 300px;
+  width: 260px;
   font-family: sans-serif;
   border: 1px solid #eee;
   border-radius: 8px;
@@ -143,13 +160,18 @@ const onConfigUpdate = async (newList: CityConfig[]) => {
 .ww__cog {
   border: 0;
   border-radius: 0.5rem;
-  padding: 0.25rem 0.4rem;
   display:flex;
   align-items: center;
+  background-color: transparent;
+  cursor:pointer;
+
+  &:hover {
+    opacity: 0.7;
+  }
 }
 
 .cog-icon {
-  width: 24px;
-  height: 24px;
+  width: 1.5rem;
+  height: 1.5rem;
 }
 </style>

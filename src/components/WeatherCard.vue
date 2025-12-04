@@ -1,17 +1,15 @@
 <template>
   <div class="weather-card">
-    <h3 class="city">{{ city }}</h3>
+    <h3 class="city">{{ city }}, {{ country }}</h3>
 
     <div class="temp-block">
       <img v-if="iconUrl" class="icon" :src="iconUrl" :alt="`Weather icon for ${city}`" />
       <span class="temp">{{ temp }}°C</span>
     </div>
 
-    <p class="desc">{{ description }}</p>
-
     <div class="details">
       <div>
-        <span class="label">Feels like:</span> {{ feelsLike }}°C
+        <span>Feels like</span> {{ feelsLike }}°C. {{ description }}
       </div>
 
       <div class="flex-between">
@@ -41,6 +39,7 @@ import PressureBlock from './PressureBlock.vue';
 
 const props = defineProps({
   city: String,
+  country: String,
   temp: Number,
   description: String,
   feelsLike: Number,
@@ -73,12 +72,13 @@ const iconUrl = props.icon ? `https://openweathermap.org/img/wn/${props.icon}@2x
 
   .city {
     font-weight: 700;
-    font-size: 18px;
+    font-size: 14px;
     margin:0;
+    text-align: left;
   }
 
   .temp-block {
-    margin-top: 10px;
+    margin: 1.5rem 0rem;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -91,7 +91,7 @@ const iconUrl = props.icon ? `https://openweathermap.org/img/wn/${props.icon}@2x
 
     .temp {
       font-size: 32px;
-      font-weight: 700;
+      font-weight: 600;
     }
   }
 
@@ -123,5 +123,6 @@ const iconUrl = props.icon ? `https://openweathermap.org/img/wn/${props.icon}@2x
   display: flex;
   justify-content: space-between;
   gap: 10px;
+  margin: 0.5rem 0;
 }
 </style>

@@ -11,49 +11,49 @@ async function getWeatherByCoords(lat: number, lon: number) {
 
   return {
     "coord": {
-        "lon": 69.5883,
-        "lat": 42.3147
+      "lon": 69.5883,
+      "lat": 42.3147
     },
     "weather": [
-        {
-            "id": 800,
-            "main": "Clear",
-            "description": "ясно",
-            "icon": "01d"
-        }
+      {
+        "id": 800,
+        "main": "Clear",
+        "description": "Clear",
+        "icon": "01d"
+      }
     ],
     "base": "stations",
     "main": {
-        "temp": 10.29,
-        "feels_like": 8.68,
-        "temp_min": 10.29,
-        "temp_max": 10.29,
-        "pressure": 1025,
-        "humidity": 50,
-        "sea_level": 1025,
-        "grnd_level": 966
+      "temp": 10.29,
+      "feels_like": 8.68,
+      "temp_min": 10.29,
+      "temp_max": 10.29,
+      "pressure": 1025,
+      "humidity": 50,
+      "sea_level": 1025,
+      "grnd_level": 966
     },
     "visibility": 10000,
     "wind": {
-        "speed": 3,
-        "deg": 45
+      "speed": 3,
+      "deg": 45
     },
     "clouds": {
-        "all": 0
+      "all": 0
     },
     "dt": 1764830440,
     "sys": {
-        "type": 1,
-        "id": 8824,
-        "country": "KZ",
-        "sunrise": 1764815650,
-        "sunset": 1764848988
+      "type": 1,
+      "id": 8824,
+      "country": "KZ",
+      "sunrise": 1764815650,
+      "sunset": 1764848988
     },
     "timezone": 18000,
     "id": 1518980,
     "name": "Шымкент",
     "cod": 200
-}
+  }
 
 
   try {
@@ -76,6 +76,36 @@ async function getWeatherByCoords(lat: number, lon: number) {
 
 async function getCityByCoords(lat: number, lon: number): Promise<CityConfig> {
   const url = `https://api.openweathermap.org/geo/1.0/reverse`;
+
+  return {
+    "name": "Shymkent",
+    "local_names": {
+      "ba": "Шымкент",
+      "az": "Şımkent",
+      "uz": "Chimkent",
+      "zh": "希姆肯特",
+      "de": "Schymkent",
+      "pt": "Shymkent",
+      "ml": "ചിംകന്ദ്",
+      "ar": "شيمكنت",
+      "et": "Šõmkent",
+      "feature_name": "Şımkent",
+      "ascii": "Şımkent",
+      "eu": "Xymkent",
+      "en": "Shymkent",
+      "tt": "Чимкәнт",
+      "ja": "シムケント",
+      "fr": "Chimkent",
+      "ru": "Шымкент",
+      "tr": "Çimkent",
+      "ro": "Shymkent",
+      "pl": "Szymkent"
+    },
+    "lat": 42.3146962,
+    "lon": 69.5883282,
+    "country": "KZ",
+    "state": "Shymkent"
+  }
 
   const { data } = await axios.get<GeoResponse>(url, {
     params: {

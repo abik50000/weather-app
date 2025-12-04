@@ -37,13 +37,15 @@ const newCity = ref("");
 const cities = ref([]);
 const emit = defineEmits(['update', 'close']);
 
+const STORAGE_KEY = "weather_widget_config_v1";
+
 onMounted(() => {
-  const saved = localStorage.getItem("weather_cities");
+  const saved = localStorage.getItem(STORAGE_KEY);
   if (saved) cities.value = JSON.parse(saved);
 });
 
 watch(cities, (val) => {
-  localStorage.setItem("weather_cities", JSON.stringify(val));
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(val));
 }, { deep: true });
 
 function addCity() {

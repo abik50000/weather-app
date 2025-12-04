@@ -24,8 +24,8 @@ const props = defineProps({
 }
 
 .pressure-icon {
-  width: 24px;
-  height: 24px;
+  width: 1.25rem;
+  height: 1.25rem;
   margin-right: 8px;
 }
 </style>

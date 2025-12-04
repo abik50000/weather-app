@@ -1,7 +1,7 @@
 import { WeatherResponse } from "./api/types/weather";
 
 export interface CityConfig {
-  id: string;
+  id?: string;
   name: string;
   lat: number;
   lon: number;
@@ -9,4 +9,11 @@ export interface CityConfig {
   description?: string;
 
   weather?: WeatherResponse;
+
+  country?: string;
+  state?: string;
+
+  local_names?: {
+    [key: string]: string;
+  }
 }
