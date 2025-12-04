@@ -1,0 +1,21 @@
+{
+  "name": "weather-app",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/main.js",
+  "scripts": {
+    "start": "vite",
+    "build": "vite build"
+  },
+  "author": "abik50000",
+  "license": "ISC",
+  "dependencies": {
+    "@vitejs/plugin-vue": "^6.0.2",
+    "axios": "^1.13.2",
+    "vue": "^3.5.25",
+    "vuedraggable": "^4.1.0"
+  },
+  "devDependencies": {
+    "sass": "^1.94.2"
+  }
+}
