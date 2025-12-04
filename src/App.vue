@@ -27,6 +27,8 @@ import SettingsPanel from "./components/SettingsPanel.vue";
 import API from "./api/weather";
 import type { CityConfig } from "./types";
 import cogIcon from './assets/cog.svg';
+import { isWeatherResponse } from "./api/types/weather";
+import type { WeatherApiResult, WeatherResponse } from "./api/types/weather";
 
 const STORAGE_KEY = "weather_widget_config_v1";
 
@@ -39,7 +41,7 @@ onMounted(async () => {
 
   if (cities.value.length > 0) {
     const updated = await loadWeather(cities.value);
-    cities.value = updated; // ← обязательно присвоить!
+    cities.value = updated;
     save();
   } else {
     addByGeolocation();
@@ -50,10 +52,10 @@ onMounted(async () => {
 
 /** Update list of cities from SettingsPanel */
 const onConfigUpdate = async (newList: CityConfig[]) => {
-  loading.value = true; // можно показать спиннер
+  loading.value = true;
   try {
-    const updated = await loadWeather(newList); // возвращает массив с icon
-    cities.value = updated; // теперь icon уже есть
+    const updated = await loadWeather(newList);
+    cities.value = updated;
     save();
   } catch (err) {
     console.error(err);
@@ -94,20 +96,31 @@ function round(num: number | undefined) {
 }
 
 /** Load weather by coords */
-const loadWeather = async (list: CityConfig[]) => {
+const loadWeather = async (list: CityConfig[]): Promise<CityConfig[]> => {
   const updated = await Promise.all(
     list.map(async (c) => {
       try {
-        const data = await API.getWeatherByCoords(Number(c.lat), Number(c.lon));
+        const data: WeatherApiResult = await API.getWeatherByCoords(Number(c.lat), Number(c.lon));
+
+        if (!isWeatherResponse(data)) {
+          throw new Error("Invalid weather data");
+        }
+
         return {
           ...c,
-          temp: Math.round(data.main.temp),
-          description: data.weather[0].description,
-          icon: data.weather[0].icon,
+          temp: Math.round((data as WeatherResponse).main.temp),
+          description: (data as WeatherResponse).weather[0].description,
+          icon: (data as WeatherResponse).weather[0].icon,
           weather: data
-        };
+        } as CityConfig;
       } catch {
-        return { ...c, temp: 0, description: "Ошибка", icon: '01d', weather: null };
+        return {
+          ...c,
+          temp: 0,
+          description: "Ошибка",
+          icon: '01d',
+          weather: undefined
+        } as CityConfig;
       }
     })
   );
@@ -130,8 +143,8 @@ const addByGeolocation = () => {
         description: "",
         country: city.country
       };
-      const updated = await loadWeather([newCity]); // загружаем погоду
-      cities.value = updated; // ← присваиваем обновлённый массив
+      const updated = await loadWeather([newCity]);
+      cities.value = updated;
       save();
     } catch (err) {
       console.error(err);
