@@ -13,15 +13,21 @@
       <div>
         <span class="label">Feels like:</span> {{ feelsLike }}°C
       </div>
-      <div>
-        <span class="label">Wind:</span> {{ wind }} m/s
+
+      <div class="flex-between">
+        <WindBlock :windSpeed="windSpeed" :windDeg="windDeg" />
+        <PressureBlock :pressure="pressure" />
       </div>
-      <div>
-        <span class="label">Humidity:</span> {{ humidity }}%
+
+      <div class="flex-between">
+        <div>
+          <span class="label">Humidity:</span> {{ humidity }}%
+        </div>
+        <div>
+          <span class="label">Dew Point:</span> {{ dew.toFixed(1) }}°C
+        </div>
       </div>
-      <div>
-        <span class="label">Pressure:</span> {{ pressure }} hPa
-      </div>
+
       <div>
         <span class="label">Visibility:</span> {{ visibility }} km
       </div>
@@ -29,35 +35,41 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
+import WindBlock from './WindBlock.vue';
+import PressureBlock from './PressureBlock.vue';
+
 const props = defineProps({
   city: String,
   temp: Number,
   description: String,
   feelsLike: Number,
-  wind: Number,
+  windSpeed: Number,
+  windDeg: Number,
   humidity: Number,
   pressure: Number,
   visibility: Number,
   icon: { type: String, default: undefined }, // openweathermap icon code
 });
 
+function dewPoint(tempC: number, humidity: number) {
+  return tempC - (100 - humidity) / 5;
+}
+
+const dew = dewPoint(10.29, 50);
+
 const iconUrl = props.icon ? `https://openweathermap.org/img/wn/${props.icon}@2x.png` : '';
 </script>
 
 <style lang="scss" scoped>
 .weather-card {
-  width: 260px;
+  width: 100%;
+  box-sizing: border-box;
   background: #fff;
   padding: 18px;
   border-radius: 14px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   text-align: center;
   transition: transform 0.2s;
-
-  &:hover {
-    transform: scale(1.02);
-  }
 
   .city {
     font-weight: 700;
@@ -103,5 +115,12 @@ const iconUrl = props.icon ? `https://openweathermap.org/img/wn/${props.icon}@2x
       margin-bottom: 4px;
     }
   }
+}
+
+
+.flex-between {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
 }
 </style>

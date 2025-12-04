@@ -18,6 +18,8 @@ export interface WeatherResponse {
     temp_max: number;
     pressure: number;
     humidity: number;
+    sea_level?: number;
+    grnd_level?: number;
   };
 
   wind: {
@@ -28,7 +30,21 @@ export interface WeatherResponse {
 
   visibility: number;
 
+  clouds?: {
+    all: number;
+  };
+
+  sys?: {
+    country: string;
+    sunrise: number;
+    sunset: number;
+  };
+
+  timezone?: number;
+  id: number;
   name: string;
+  base?: string;
+  cod?: number;
 }
 
 export interface WeatherError {

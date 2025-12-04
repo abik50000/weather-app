@@ -8,10 +8,21 @@
     <div v-if="loading" class="ww__loading">Загрузка...</div>
 
     <div v-else class="ww__list">
-      <WeatherCard v-for="city in cities" :key="city.id" :city="city" />
+      <WeatherCard v-for="city in cities"
+        :key="city.id"
+        :city="city.name"
+        :temp="city.weather?.main?.temp"
+        :description="city.description" 
+        :feelsLike="city.weather?.main?.feels_like" 
+        :windSpeed="city.weather?.wind?.speed"
+        :windDeg="city.weather?.wind?.deg"
+        :humidity="city.weather?.main?.humidity" 
+        :pressure="city.weather?.main?.pressure"
+        :visibility="city.weather?.visibility" 
+        :icon="city.weather?.weather[0]?.icon" />
     </div>
 
-    <SettingsPanel v-if="open" :cities="cities" @update="onConfigUpdate" />
+    <SettingsPanel v-if="open" :cities="cities" @update="onConfigUpdate" @close="open = false"/>
   </div>
 </template>
 
@@ -66,10 +77,13 @@ export default defineComponent({
           try {
             const data = await API.getWeatherByCoords(Number(c.lat), Number(c.lon));
 
+            console.log("Weather data:", data);
+
             return {
               ...c,
               temp: Math.round(data.main.temp),
               description: data.weather[0].description,
+              weather: data
             };
           } catch {
             return { ...c, temp: 0, description: "Ошибка" };
@@ -78,6 +92,7 @@ export default defineComponent({
       );
 
       cities.value = updated;
+      console.log("Updated cities:", updated);
       save();
     };
 
@@ -139,11 +154,12 @@ export default defineComponent({
 
 <style scoped>
 .ww {
-  width: 320px;
+  width: 300px;
   font-family: Arial, sans-serif;
   border: 1px solid #eee;
   border-radius: 8px;
   background: #fff;
+  position: relative;
 }
 
 .ww__header {
