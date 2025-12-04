@@ -8,19 +8,12 @@
     <div v-if="loading" class="ww__loading">Loading...</div>
 
     <div v-else class="ww__list">
-      <WeatherCard v-for="city in cities"
-        :key="city.id"
-        :city="city.name"
-        :country="city.country"
-        :temp="round(city.weather?.main?.temp)"
-        :description="city.description"
-        :feelsLike="round(city.weather?.main?.feels_like)"
-        :windSpeed="city.weather?.wind?.speed"
-        :windDeg="city.weather?.wind?.deg"
-        :humidity="city.weather?.main?.humidity"
-        :pressure="city.weather?.main?.pressure"
-        :visibility="city.weather?.visibility"
-        :icon="city.weather?.weather[0]?.icon" />
+      <WeatherCard v-for="city in cities" :key="city.id" :city="city.name" :country="city.country"
+        :temp="round(city.weather?.main?.temp)" :description="city.description"
+        :feelsLike="round(city.weather?.main?.feels_like)" :windSpeed="city.weather?.wind?.speed"
+        :windDeg="city.weather?.wind?.deg" :humidity="city.weather?.main?.humidity"
+        :pressure="city.weather?.main?.pressure" :visibility="city.weather?.visibility"
+        :icon="city.weather?.weather?.[0]?.icon" />
     </div>
 
     <SettingsPanel v-if="open" :cities="cities" @update="onConfigUpdate" @close="open = false" />
@@ -40,6 +33,35 @@ const STORAGE_KEY = "weather_widget_config_v1";
 const cities = ref<CityConfig[]>([]);
 const loading = ref(true);
 const open = ref(false);
+
+onMounted(async () => {
+  load();
+
+  if (cities.value.length > 0) {
+    const updated = await loadWeather(cities.value);
+    cities.value = updated; // ← обязательно присвоить!
+    save();
+  } else {
+    addByGeolocation();
+  }
+
+  loading.value = false;
+});
+
+/** Update list of cities from SettingsPanel */
+const onConfigUpdate = async (newList: CityConfig[]) => {
+  loading.value = true; // можно показать спиннер
+  try {
+    const updated = await loadWeather(newList); // возвращает массив с icon
+    cities.value = updated; // теперь icon уже есть
+    save();
+  } catch (err) {
+    console.error(err);
+  } finally {
+    loading.value = false;
+    open.value = false;
+  }
+};
 
 /** Save to localStorage */
 const save = () => {
@@ -77,15 +99,19 @@ const loadWeather = async (list: CityConfig[]) => {
     list.map(async (c) => {
       try {
         const data = await API.getWeatherByCoords(Number(c.lat), Number(c.lon));
-        return { ...c, temp: Math.round(data.main.temp), description: data.weather[0].description, weather: data };
+        return {
+          ...c,
+          temp: Math.round(data.main.temp),
+          description: data.weather[0].description,
+          icon: data.weather[0].icon,
+          weather: data
+        };
       } catch {
-        return { ...c, temp: 0, description: "Ошибка" };
+        return { ...c, temp: 0, description: "Ошибка", icon: '01d', weather: null };
       }
     })
   );
-
-  cities.value = updated;
-  save();
+  return updated;
 };
 
 /** Add city by geolocation */
@@ -96,38 +122,31 @@ const addByGeolocation = () => {
     const { latitude, longitude } = pos.coords;
     try {
       const city = await API.getCityByCoords(latitude, longitude);
-      console.log('City:', city)
-      const newCity: CityConfig = { id: city.id, name: city.name, lat: city.lat, lon: city.lon, description: "", country: city.country };
-      cities.value = [newCity];
+      const newCity: CityConfig = {
+        id: city.id,
+        name: city.name,
+        lat: city.lat,
+        lon: city.lon,
+        description: "",
+        country: city.country
+      };
+      const updated = await loadWeather([newCity]); // загружаем погоду
+      cities.value = updated; // ← присваиваем обновлённый массив
       save();
-      await loadWeather(cities.value);
     } catch (err) {
       console.error(err);
     }
   });
 };
 
-onMounted(async () => {
-  load();
-  if (cities.value.length > 0) await loadWeather(cities.value);
-  else addByGeolocation();
-  loading.value = false;
-});
-
-/** Update list of cities from SettingsPanel */
-const onConfigUpdate = async (newList: CityConfig[]) => {
-  cities.value = newList;
-  save();
-  await loadWeather(cities.value);
-  open.value = false;
-};
 </script>
 
 
 <style scoped lang="scss">
-*{
+* {
   font-family: 'Inter', sans-serif;
 }
+
 .ww {
   width: 260px;
   font-family: sans-serif;
@@ -146,8 +165,8 @@ const onConfigUpdate = async (newList: CityConfig[]) => {
   border-bottom: 1px solid #f2f2f2;
 
   h3 {
-     font-size: 1rem;
-     font-weight: 600;
+    font-size: 1rem;
+    font-weight: 600;
   }
 }
 
@@ -160,10 +179,10 @@ const onConfigUpdate = async (newList: CityConfig[]) => {
 .ww__cog {
   border: 0;
   border-radius: 0.5rem;
-  display:flex;
+  display: flex;
   align-items: center;
   background-color: transparent;
-  cursor:pointer;
+  cursor: pointer;
 
   &:hover {
     opacity: 0.7;

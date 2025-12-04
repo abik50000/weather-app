@@ -9,7 +9,7 @@
       <template #item="{ element, index }">
         <div :key="element.id" class="city-item">
           <span class="handle">☰</span>
-          <span class="city-name">{{ element.name }}</span>
+          <span class="city-name">{{ element.name }}, {{ element.country }}</span>
           <button @click="removeCity(index)" class="remove-btn"><img class="remove-icon" :src="trashIcon"
               alt="Remove" /></button>
         </div>
@@ -28,13 +28,15 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, watch, onMounted } from "vue";
 import draggable from "vuedraggable";
 import trashIcon from "../assets/trash.svg";
+import API from "../api/weather";
+import type { CityConfig } from "../types";
 
 const newCity = ref("");
-const cities = ref([]);
+const cities = ref<CityConfig[]>([]);
 const emit = defineEmits(['update', 'close']);
 
 const STORAGE_KEY = "weather_widget_config_v1";
@@ -48,21 +50,40 @@ watch(cities, (val) => {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(val));
 }, { deep: true });
 
-function addCity() {
-  if (!newCity.value.trim()) return;
-  cities.value.push({ id: crypto.randomUUID(), name: newCity.value.trim() });
-  newCity.value = "";
+async function addCity() {
+  const cityName = newCity.value.trim();
+  if (!cityName) return;
+
+  try {
+    const coords = await API.getCoordsByCity(cityName);
+
+    // Добавляем город с координатами
+    cities.value.push({
+      id: crypto.randomUUID(),
+      name: coords.name,
+      lat: coords.lat,
+      lon: coords.lon,
+      country: coords.country,
+      description: "",
+    });
+
+    newCity.value = "";
+  } catch (err: any) {
+    console.error(err.message || err);
+    alert("Город не найден");
+  }
 }
 
 function onDragEnd() {
   cities.value = [...cities.value];
 }
 
-function removeCity(index) {
+function removeCity(index: number) {
   cities.value.splice(index, 1);
 }
 
 function closeSettings() {
+  emit('update', cities.value);
   emit('close');
 }
 </script>
@@ -134,7 +155,7 @@ function closeSettings() {
       border-radius: 0 0.25rem 0.25rem 0;
       border: none;
       cursor: pointer;
-      font-size: 1rem;
+      font-size: 1.25rem;
     }
 
 
@@ -157,6 +178,7 @@ function closeSettings() {
 
     .city-name {
       flex: 1;
+      font-size: 0.85rem;
     }
 
     .remove-btn {
